@@ -1,0 +1,10 @@
+Package: MyfarsPkg
+Type: Package
+Title: Read Fatality Analysis Reporting System (FARS) data
+Version: 0.1.0
+Author: Sundar Mallikarjun
+Maintainer: Sundar Mallikarjun <sundarm@rediffmail.com>
+Description: Coursera Building R Packages Week 4 Assignment.
+License: GPL3
+Encoding: UTF-8
+LazyData: true
