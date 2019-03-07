@@ -6,7 +6,7 @@
 #'
 #' @title fars_read
 #'
-#' @description Reads in file to data variable using the read_csv function 
+#' @description Reads in file to data variable using the read_csv function
 #' and creates a dataframe summarizing the contents.
 #'
 #' @param filename A character object which corresponds to a valid path of the data file.
@@ -19,7 +19,8 @@
 #'
 #' @examples
 #' \dontrun{
-#' accident_2015 <- fars_read("./data/accident_2015.csv.bz2")
+#' library(MyfarsPkg)
+#' accident_2015 <- fars_read(".inst/extdata/accident_2015.csv.bz2")
 #' }
 #' @export
 
@@ -34,7 +35,7 @@ fars_read <- function(filename) {
 
 #' @title make_filename
 #'
-#' @description 
+#' @description
 #' The function creates a filename for a .csv.bz2 file based on the \code{year}
 #' argument in a form "accident_<year>.csv.bz2". It requires a numerical or
 #' integer input otherwise ends with an error.
@@ -46,6 +47,7 @@ fars_read <- function(filename) {
 #'
 #' @examples
 #' \dontrun{
+#' library(MyfarsPkg)
 #' make_filename(2015)
 #' }
 #' @export
@@ -57,7 +59,7 @@ make_filename <- function(year) {
 
 #' @title fars_read_years
 #'
-#' @description 
+#' @description
 #' The function accepts a vector or list of years and returns a list of dataframe
 #' with MONTH and year columns based on data in "accident_<year>.csv.bz2
 #' files. The files need to be located in the working directory.
@@ -74,6 +76,7 @@ make_filename <- function(year) {
 #'
 #' @examples
 #' \dontrun{
+#' library(MyfarsPkg)
 #' fars_read_years(2013:2015)
 #' fars_read_years(list(2013, 2014))
 #'
@@ -87,7 +90,7 @@ fars_read_years <- function(years) {
     file <- make_filename(year)
     tryCatch({
       dat <- fars_read(file)
-      dplyr::mutate(dat, year = year) %>% 
+      dplyr::mutate(dat, year = year) %>%
         dplyr::select(MONTH, year)
     }, error = function(e) {
       warning("invalid year: ", year)
@@ -99,17 +102,17 @@ fars_read_years <- function(years) {
 
 #' @title fars_summarize_years
 #'
-#' @description 
-#' takes a list of years and reads them in using fars_read_years 
+#' @description
+#' takes a list of years and reads them in using fars_read_years
 #' it then binds these dataframe together and summarizes the data.
 #'
-#' @param years A vector or list of years (numeric or integer) to 
+#' @param years A vector or list of years (numeric or integer) to
 #' read in and summarize
 #'
-#' The function will take in a vector of years and read in the data using 
-#' the fars_summarize_years function, it then binds these rows together and 
-#' groups by the year and MONTH column creating a count column: n. 
-#' The data is then converted from a long format to a wide format using 
+#' The function will take in a vector of years and read in the data using
+#' the fars_summarize_years function, it then binds these rows together and
+#' groups by the year and MONTH column creating a count column: n.
+#' The data is then converted from a long format to a wide format using
 #' the spread function in tidyr.
 #'
 #' @return a data.frame of summarized data which is converted to a wide format
@@ -119,7 +122,7 @@ fars_read_years <- function(years) {
 #'
 #' @examples
 #' \donttest{
-#'  library(farspkg)
+#'  library(MyfarsPkg)
 #'  fars_summarize_years("2015")
 #'  fars_summarize_years(c(2013.0,2014))
 #'  }
@@ -127,31 +130,32 @@ fars_read_years <- function(years) {
 
 fars_summarize_years <- function(years) {
   dat_list <- fars_read_years(years)
-  dplyr::bind_rows(dat_list) %>% 
-    dplyr::group_by(year, MONTH) %>% 
+  dplyr::bind_rows(dat_list) %>%
+    dplyr::group_by(year, MONTH) %>%
     dplyr::summarize(n = n()) %>%
     tidyr::spread(year, n)
 }
 
 #' @title fars_map_state
 #'
-#' @description 
-#' This function takes a state number and set of years as input and shows 
+#' @description
+#' This function takes a state number and set of years as input and shows
 #' an overview of fatalities on a map in that particular time period.
 #'
-#' Uses function make_filename and fars_read from the current package. 
-#' Removes coordinate outliers - longitude values greater than 900 
+#' Uses function make_filename and fars_read from the current package.
+#' Removes coordinate outliers - longitude values greater than 900
 #' and latitude values greater than 90 are removed.
 #'
 #' @param state.num The number of a state in the US as used in the FARS dataset
 #' Should be numeric or integer.
 #' @param year The year of analysis (numeric or integer)
 #'
-#' @return a graphical overview of fatalities on a map in a particular time period. 
+#' @return a graphical overview of fatalities on a map in a particular time period.
 #' Returns an error if the state or year do not exist in the data set.
 #'
 #' @examples
 #' \dontrun{
+#' library(MyfarsPkg)
 #' fars_map_state(45, 2015)
 #'
 #' # Results in an error
@@ -169,7 +173,7 @@ fars_map_state <- function(state.num, year) {
   filename <- make_filename(year)
   data <- fars_read(filename)
   state.num <- as.integer(state.num)
-  
+
   if(!(state.num %in% unique(data$STATE)))
     stop("invalid STATE number: ", state.num)
   data.sub <- dplyr::filter(data, STATE == state.num)

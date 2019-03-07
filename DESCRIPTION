@@ -8,3 +8,14 @@ Description: Coursera Building R Packages Week 4 Assignment.
 License: GPL3
 Encoding: UTF-8
 LazyData: true
+Imports:
+ dplyr,
+ readr,
+ maps,
+ tidyr,
+ magrittr,
+ graphics,
+ roxygen2
+Suggests: knitr,
+    rmarkdown,
+    testthat
