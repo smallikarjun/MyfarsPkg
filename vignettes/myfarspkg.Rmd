@@ -1,0 +1,79 @@
+---
+title: "FARS Functions"
+author: "Sundar Mallikarjun"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+# Fatality Analysis Reporting System (FARS)
+
+The FARS package is very simple tool that helps to explore the data from FARS (Fatality Analysis Reporting System). The FARS package reads and summarizes the data and map the locations of accidents. 
+
+## FARS Data
+The files are provided by the US National Highway Traffic Safety Administration (NHTSA) Fatality Analysis Reporting System (FARS). It lists the fatal vehicle crashes in the United States for each year. Check NHTSA website for more information https://www.nhtsa.gov/research-data/fatality-analysis-reporting-system-fars.
+
+Annual accident data should be downloaded from FARS website and saved in the current working directory. Libraries that will be used by functions in FARS package:
+
+```{r, echo = TRUE, eval=FALSE}
+# Libraries
+library(dplyr)
+library(readr)
+library(magrittr)
+library(tidyr)
+library(maps)
+library(graphics)
+```
+
+
+## Reading the FARS Data
+
+### Data for one year
+If you want to explore fatality data for a selected year, use the fars_read_years() function and input the year you need to research.
+
+```{r, echo = TRUE, eval=FALSE}
+# year 2013
+Data2013<-fars_read_years(2013)
+Data2013
+```
+
+This function returns tbl_df (the tidyverse data frame) having the month and a year for each fatal accident. This data can be used only for counting the number of accidents by month.
+
+### Multiple years data
+If you need to explore the data for multiple years, you need to enter a vector of years as the argument for the fars_read_years() function. 
+
+```{r, echo = TRUE, eval=FALSE}
+# years 2013-2015
+Data2013_15<-fars_read_years(2013:2015)
+Data2013_15
+```
+
+In this case the this returns also a list of tbl_dfs. Each data frame will show the month and year for each fatality.
+
+## Summarize the FARS Data
+To make a summary of fatalities use fars_summarize_years() function. You need to enter a year or a vector of years as the argument of this function.
+
+```{r, echo = TRUE, eval=FALSE}
+FARS_Summary<-fars_summarize_years(2013:2015)
+FARS_Summary
+```
+
+The function will return the number of accidents by month and year.
+
+## Accidents map
+To map accidents use fars_map_state() function. As an argument add a year or years and state ID number. This function displays a plot with a state map including the accidents for the selected year.
+
+```{r, echo = TRUE, eval=FALSE}
+# Map accident locations for 2013 for state number 42, Pensylvania
+fars_map_state(state.num = 42, year = 2015)
+```
