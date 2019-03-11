@@ -19,11 +19,9 @@
 #'
 #' @examples
 #' \dontrun{
-#' library(MyfarsPkg)
 #' accident_2015 <- fars_read(".inst/extdata/accident_2015.csv.bz2")
 #' }
 #' @export
-
 fars_read <- function(filename) {
   if(!file.exists(filename))
     stop("file '", filename, "' does not exist")
@@ -47,11 +45,9 @@ fars_read <- function(filename) {
 #'
 #' @examples
 #' \dontrun{
-#' library(MyfarsPkg)
 #' make_filename(2015)
 #' }
 #' @export
-
 make_filename <- function(year) {
   year <- as.integer(year)
   sprintf("accident_%d.csv.bz2", year)
@@ -76,7 +72,6 @@ make_filename <- function(year) {
 #'
 #' @examples
 #' \dontrun{
-#' library(MyfarsPkg)
 #' fars_read_years(2013:2015)
 #' fars_read_years(list(2013, 2014))
 #'
@@ -84,21 +79,19 @@ make_filename <- function(year) {
 #' fars_read_years(2016)
 #' }
 #' @export
-
 fars_read_years <- function(years) {
   lapply(years, function(year) {
     file <- make_filename(year)
     tryCatch({
       dat <- fars_read(file)
-      dplyr::mutate(dat, year = year) %>%
-        dplyr::select(MONTH, year)
+      dplyr::mutate_(dat,  year = "YEAR") %>%
+        dplyr::select_("MONTH", "year")
     }, error = function(e) {
       warning("invalid year: ", year)
       return(NULL)
     })
   })
 }
-
 
 #' @title fars_summarize_years
 #'
@@ -121,19 +114,17 @@ fars_read_years <- function(years) {
 #' @importFrom tidyr spread
 #'
 #' @examples
-#' \donttest{
-#'  library(MyfarsPkg)
+#' \dontrun{
 #'  fars_summarize_years("2015")
 #'  fars_summarize_years(c(2013.0,2014))
 #'  }
 #' @export
-
 fars_summarize_years <- function(years) {
   dat_list <- fars_read_years(years)
   dplyr::bind_rows(dat_list) %>%
-    dplyr::group_by(year, MONTH) %>%
-    dplyr::summarize(n = n()) %>%
-    tidyr::spread(year, n)
+    dplyr::group_by_("year", "MONTH") %>%
+    dplyr::summarize_(n = "n()") %>%
+    tidyr::spread_("year", "n")
 }
 
 #' @title fars_map_state
@@ -155,7 +146,6 @@ fars_summarize_years <- function(years) {
 #'
 #' @examples
 #' \dontrun{
-#' library(MyfarsPkg)
 #' fars_map_state(45, 2015)
 #'
 #' # Results in an error
@@ -168,15 +158,14 @@ fars_summarize_years <- function(years) {
 #' @importFrom graphics points
 #'
 #' @export
-
 fars_map_state <- function(state.num, year) {
   filename <- make_filename(year)
   data <- fars_read(filename)
   state.num <- as.integer(state.num)
-
-  if(!(state.num %in% unique(data$STATE)))
+  if(!(state.num %in% unique(data$STATE))) {
     stop("invalid STATE number: ", state.num)
-  data.sub <- dplyr::filter(data, STATE == state.num)
+  }
+  data.sub <- dplyr::filter_(data, .dots = paste0("STATE==", state.num))
   if(nrow(data.sub) == 0L) {
     message("no accidents to plot")
     return(invisible(NULL))
